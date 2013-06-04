@@ -1,0 +1,12 @@
+{
+    "name": "admitad/user-bundle",
+    "type": "library",
+    "description": "Admitad user bundle",
+    "keywords": ["admitad", "symfony"],
+    "autoload": {
+        "psr-0": { "Admitad\\UserBundle\\": "src/" }
+    },
+    "require": {
+        "php": ">=5.3.0",
+    }
+}
