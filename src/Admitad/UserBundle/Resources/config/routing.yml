@@ -1,11 +1,11 @@
 login_admitad_store:
-    path: /login/admitad-store/
-    defaults: { _controller: UserBundle:Login:admitadStoreLogin }
+    path: /admitad-store/
+    defaults: { _controller: AdmitadUserBundle:Login:admitadStoreLogin }
 
 login_admitad_oauth:
-    path: /login/admitad-oauth/
-    defaults: { _controller: UserBundle:Login:admitadOAuthLogin }
+    path: /admitad-oauth/
+    defaults: { _controller: AdmitadUserBundle:Login:admitadOAuthLogin }
 
 login_admitad_oauth_check:
-    path: /login/admitad-oauth/check
-    defaults: { _controller: UserBundle:Login:admitadOAuthLoginCheck }
+    path: /admitad-oauth/check
+    defaults: { _controller: AdmitadUserBundle:Login:admitadOAuthLoginCheck }
