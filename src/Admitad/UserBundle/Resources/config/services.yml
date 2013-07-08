@@ -1,6 +1,10 @@
 services:
-    admitad.expired_token_listener:
+    admitad_user.manager:
+        class: Admitad\UserBundle\Manager\Manager
+        arguments: [@fos_user.user_manager, %admitad_user.client_id%, %admitad_user.client_secret%]
+
+    admitad_user.expired_token_listener:
         class: Admitad\UserBundle\EventListener\KernelListener
-        arguments: [@security.context, @fos_user.user_manager, @router, %admitad_user.client_id%, %admitad_user.client_secret%]
+        arguments: [@security.context, @admitad_user.manager, @router]
         tags:
             - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest }

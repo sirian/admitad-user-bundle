@@ -2,10 +2,9 @@
 
 namespace Admitad\UserBundle\EventListener;
 
-use Admitad\Api\Api;
 use Admitad\Api\ApiException;
 use Admitad\UserBundle\Entity\User;
-use FOS\UserBundle\Model\UserManagerInterface;
+use Admitad\UserBundle\Manager\Manager;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
@@ -20,25 +19,20 @@ class KernelListener
     protected $securityContext;
 
     /**
-     * @var UserManagerInterface
+     * @var Manager
      */
-    protected $userManager;
+    protected $manager;
 
     /**
      * @var Router
      */
     protected $router;
 
-    protected $clientId;
-    protected $clientSecret;
-
-    public function __construct(SecurityContext $securityContext, UserManagerInterface $userManager, Router $router, $clientId, $clientSecret)
+    public function __construct(SecurityContext $securityContext, Manager $manager, Router $router)
     {
         $this->securityContext = $securityContext;
-        $this->userManager = $userManager;
         $this->router = $router;
-        $this->clientId = $clientId;
-        $this->clientSecret = $clientSecret;
+        $this->manager = $manager;
     }
 
     public function onKernelRequest(GetResponseEvent $event)
@@ -67,23 +61,11 @@ class KernelListener
             return;
         }
 
-        if ($user->isAdmitadTokenExpired() && $user->getAdmitadRefreshToken()) {
-            try {
-                $api = new Api();
-                $data = $api
-                    ->refreshToken($this->clientId, $this->clientSecret, $user->getAdmitadRefreshToken())
-                    ->getArrayResult()
-                ;
-                $user->setAdmitadAccessToken($data['access_token']);
-                $user->setAdmitadRefreshToken($data['refresh_token']);
-                $user->setAdmitadTokenExpireIn($data['expires_in']);
-                $this->userManager->updateUser($user);
-            } catch (ApiException $e) {
-                $authUrl = $this->router->generate('login_admitad_oauth');
-                $user->setAdmitadRefreshToken('');
-                $this->userManager->updateUser($user);
-                $event->setResponse(new RedirectResponse($authUrl));
-            }
+        try {
+            $this->manager->refreshExpiredToken($user);
+        } catch (ApiException $e) {
+            $authUrl = $this->router->generate('login_admitad_oauth');
+            $event->setResponse(new RedirectResponse($authUrl));
         }
     }
 }

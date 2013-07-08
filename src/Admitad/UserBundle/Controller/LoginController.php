@@ -61,15 +61,24 @@ class LoginController extends Controller
 
     protected function authUser($data)
     {
+        /**
+         * @var \Admitad\DirectBundle\Entity\User $user
+         */
         $user = $this->getUserManager()->findUserBy(['admitadId' => $data['id']]);
         if (!$user) {
             $user = $this->getUserManager()->createUser();
-            $user->setAdmitadId($data['id']);
-            $user->setUsername($data['username']);
         }
 
-        $user->setFirstName($data['first_name']);
-        $user->setLastName($data['last_name']);
+        $api = new Api($data['access_token']);
+        $me = $api->get('/me/')->getArrayResult();
+
+        if (isset($me['email'])) {
+            $user->setEmail($me['email']);
+        }
+        $user->setAdmitadId($me['id']);
+        $user->setUsername($me['username']);
+        $user->setFirstName($me['first_name']);
+        $user->setLastName($me['last_name']);
         $user->setAdmitadAccessToken($data['access_token']);
         $user->setAdmitadRefreshToken($data['refresh_token']);
         $user->setAdmitadTokenExpireIn($data['expires_in']);
@@ -88,7 +97,7 @@ class LoginController extends Controller
 
         $this->container->get('security.context')->setToken($token);
 
-        // Since we're "faking" normal login, we need to throw our INTERACTIVE_LOGIN event manually
+        //todo: Since we're "faking" normal login, we need to throw our INTERACTIVE_LOGIN event manually
         $this->container->get('event_dispatcher')->dispatch(
             SecurityEvents::INTERACTIVE_LOGIN,
             new InteractiveLoginEvent($this->getRequest(), $token)
