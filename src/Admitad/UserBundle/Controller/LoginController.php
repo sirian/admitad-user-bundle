@@ -5,7 +5,9 @@ namespace Admitad\UserBundle\Controller;
 use Admitad\Api\Api;
 use Admitad\UserBundle\Entity\User;
 use FOS\UserBundle\Model\UserManagerInterface;
+use FOS\UserBundle\Security\LoginManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -85,23 +87,19 @@ class LoginController extends Controller
 
         $this->getUserManager()->updateUser($user);
 
-        $this->loginUser($user);
+        $response = $this->redirect($this->generateUrl('index'));
 
-        return $this->redirect($this->generateUrl('index'));
+        $this->getLoginManager()->loginUser('main', $user, $response);
+
+        return $response;
     }
 
-    protected function loginUser(User $user)
+    /**
+     * @return LoginManagerInterface
+     */
+    protected function getLoginManager()
     {
-        $token = new UsernamePasswordToken($user, null, 'main', $user->getRoles());
-        $token->setUser($user);
-
-        $this->container->get('security.context')->setToken($token);
-
-        //todo: Since we're "faking" normal login, we need to throw our INTERACTIVE_LOGIN event manually
-        $this->container->get('event_dispatcher')->dispatch(
-            SecurityEvents::INTERACTIVE_LOGIN,
-            new InteractiveLoginEvent($this->getRequest(), $token)
-        );
+        return $this->container->get('fos_user.security.login_manager');
     }
 
     /**
