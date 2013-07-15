@@ -3,7 +3,7 @@
 namespace Admitad\UserBundle\Manager;
 
 use Admitad\Api\Api;
-use Admitad\Api\ApiException;
+use Admitad\Api\Exception\Exception;
 use Admitad\UserBundle\Entity\User;
 use FOS\UserBundle\Model\UserManagerInterface;
 
@@ -37,7 +37,7 @@ class Manager
                 $user->setAdmitadRefreshToken($data['refresh_token']);
                 $user->setAdmitadTokenExpireIn($data['expires_in']);
                 $this->userManager->updateUser($user);
-            } catch (ApiException $e) {
+            } catch (Exception $e) {
                 $user->setAdmitadRefreshToken('');
                 $this->userManager->updateUser($user);
                 throw $e;

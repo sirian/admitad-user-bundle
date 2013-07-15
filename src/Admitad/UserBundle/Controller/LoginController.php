@@ -3,6 +3,7 @@
 namespace Admitad\UserBundle\Controller;
 
 use Admitad\Api\Api;
+use Admitad\Api\Exception\InvalidSignedRequestException;
 use Admitad\UserBundle\Entity\User;
 use FOS\UserBundle\Model\UserManagerInterface;
 use FOS\UserBundle\Security\LoginManagerInterface;
@@ -19,28 +20,27 @@ class LoginController extends Controller
 {
     public function admitadStoreLoginAction(Request $request)
     {
-        $signedRequest = $request->query->get('signed_request');
-        list ($key, $data) = explode('.', $signedRequest);
-
-        $hash = hash_hmac('sha256', $data, $this->container->getParameter('admitad_user.client_secret'));
-        if ($hash != $key) {
+        $api = new Api();
+        try {
+            $data = $api->parseSignedRequest(
+                $request->query->get('signed_request'),
+                $this->container->getParameter('admitad_user.client_secret')
+            );
+        } catch (InvalidSignedRequestException $e) {
             throw new AccessDeniedHttpException("Invalid signed request");
         }
-        $data = json_decode(base64_decode($data), true);
 
         return $this->authUser($data);
     }
 
     public function admitadOAuthLoginAction()
     {
-        $query = [
-            'scope' => $this->container->getParameter('admitad_user.scope'),
-            'client_id' => $this->container->getParameter('admitad_user.client_id'),
-            'redirect_uri' => $this->generateUrl('login_admitad_oauth_check', [], UrlGeneratorInterface::ABSOLUTE_URL),
-            'response_type' => 'code'
-        ];
-
-        return $this->redirect('https://api.admitad.com/authorize/?' . http_build_query($query));
+        $api = new Api();
+        return $this->redirect($api->getAuthorizeUrl(
+            $this->container->getParameter('admitad_user.client_id'),
+            $this->generateUrl('login_admitad_oauth_check', [], UrlGeneratorInterface::ABSOLUTE_URL),
+            $this->container->getParameter('admitad_user.scope')
+        ));
     }
 
     public function admitadOAuthLoginCheckAction(Request $request)
@@ -56,7 +56,7 @@ class LoginController extends Controller
             $this->container->getParameter('admitad_user.client_secret'),
             $code,
             $this->generateUrl('login_admitad_oauth_check', [], UrlGeneratorInterface::ABSOLUTE_URL)
-        )->getArrayResult();
+        )->getResult();
 
         return $this->authUser($data);
     }
@@ -72,7 +72,7 @@ class LoginController extends Controller
         }
 
         $api = new Api($data['access_token']);
-        $me = $api->get('/me/')->getArrayResult();
+        $me = $api->get('/me/')->getResult();
 
         if (isset($me['email'])) {
             $user->setEmail($me['email']);

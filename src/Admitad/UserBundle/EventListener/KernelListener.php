@@ -2,7 +2,7 @@
 
 namespace Admitad\UserBundle\EventListener;
 
-use Admitad\Api\ApiException;
+use Admitad\Api\Exception\Exception;
 use Admitad\UserBundle\Entity\User;
 use Admitad\UserBundle\Manager\Manager;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
@@ -63,7 +63,7 @@ class KernelListener
 
         try {
             $this->manager->refreshExpiredToken($user);
-        } catch (ApiException $e) {
+        } catch (Exception $e) {
             $authUrl = $this->router->generate('login_admitad_oauth');
             $event->setResponse(new RedirectResponse($authUrl));
         }
