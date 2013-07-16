@@ -47,7 +47,7 @@ class LoginController extends Controller
     {
         $code = $request->query->get('code');
         if (!$code) {
-            throw new \InvalidArgumentException('Authorization failed');
+            throw new AccessDeniedHttpException('Authorization failed');
         }
 
         $api = new Api();
@@ -69,6 +69,7 @@ class LoginController extends Controller
         $user = $this->getUserManager()->findUserBy(['admitadId' => $data['id']]);
         if (!$user) {
             $user = $this->getUserManager()->createUser();
+            $user->setEnabled(true);
         }
 
         $api = new Api($data['access_token']);
