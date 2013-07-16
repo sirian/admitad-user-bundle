@@ -73,7 +73,7 @@ class LoginController extends Controller
         }
 
         $api = new Api($data['access_token']);
-        $me = $api->get('/me/')->getResult();
+        $me = $api->me()->getResult();
 
         if (isset($me['email'])) {
             $user->setEmail($me['email']);
