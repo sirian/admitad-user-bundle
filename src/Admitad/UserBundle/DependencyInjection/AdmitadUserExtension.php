@@ -14,11 +14,15 @@ class AdmitadUserExtension extends Extension
 
         $config = $this->processConfiguration(new Configuration(), $configs);
 
-        foreach(['client_id', 'client_secret', 'scope'] as $param) {
-            $container->setParameter('admitad_user.' . $param, $config[$param]);
-        }
-
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $loader->load('services.yml');
+
+        $container->setParameter('admitad_user.config', $config);
+
+        $manager = $container->getDefinition('admitad_user.manager');
+        $manager
+            ->addArgument($config['user_class'])
+            ->addArgument($config['api'])
+        ;
     }
 }

@@ -14,9 +14,13 @@ class Configuration implements ConfigurationInterface
 
         $root
             ->children()
-                ->scalarNode('client_id')->isRequired()->end()
-                ->scalarNode('client_secret')->isRequired()->end()
-                ->scalarNode('scope')->isRequired()->end()
+                ->arrayNode('api')
+                    ->children()
+                        ->scalarNode('client_id')->isRequired()->end()
+                        ->scalarNode('client_secret')->isRequired()->end()
+                    ->end()
+                ->end()
+                ->scalarNode('user_class')->isRequired()->end()
             ->end()
         ;
 

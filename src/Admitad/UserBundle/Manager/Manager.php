@@ -4,59 +4,99 @@ namespace Admitad\UserBundle\Manager;
 
 use Admitad\Api\Api;
 use Admitad\Api\Exception\Exception;
-use Admitad\UserBundle\Entity\User;
-use FOS\UserBundle\Model\UserManagerInterface;
+use Admitad\UserBundle\Model\UserInterface;
+use Admitad\UserBundle\Security\Authentication\Token\AbstractToken;
+use Doctrine\Bundle\DoctrineBundle\Registry;
 
 class Manager
 {
-    private $clientId;
-    private $clientSecret;
+    protected $userEntityManager;
+    protected $userClass;
+    protected $apiOptions;
 
-    /**
-     * @var UserManagerInterface
-     */
-    private $userManager;
-
-    public function __construct(UserManagerInterface $userManager, $clientId, $clientSecret)
+    public function __construct(Registry $doctrine, $userClass, $apiOptions)
     {
-        $this->userManager = $userManager;
-        $this->clientId = $clientId;
-        $this->clientSecret = $clientSecret;
+        $this->userEntityManager = $doctrine->getManagerForClass($userClass);
+        $this->apiOptions = $apiOptions;
+        $this->userClass = $userClass;
     }
 
-    public function refreshExpiredToken(User $user)
+    public function refreshExpiredToken(UserInterface $user)
     {
-        if ($user->isAdmitadTokenExpired() && $user->getAdmitadRefreshToken()) {
+        if ($user->isAdmitadTokenExpired()) {
+            if (!$user->getAdmitadRefreshToken()) {
+                return false;
+            }
             try {
                 $api = $this->getAdmitadApi($user);
                 $data = $api
-                    ->refreshToken($this->clientId, $this->clientSecret, $user->getAdmitadRefreshToken())
+                    ->refreshToken($this->getClientId(), $this->getClientSecret(), $user->getAdmitadRefreshToken())
                     ->getArrayResult()
                 ;
                 $user->setAdmitadAccessToken($data['access_token']);
                 $user->setAdmitadRefreshToken($data['refresh_token']);
                 $user->setAdmitadTokenExpireIn($data['expires_in']);
-                $this->userManager->updateUser($user);
+                $this->userEntityManager->flush($user);
             } catch (Exception $e) {
                 $user->setAdmitadRefreshToken('');
-                $this->userManager->updateUser($user);
+                $user->setAdmitadAccessToken('');
+                $this->userEntityManager->flush($user);
                 throw $e;
             }
         }
+        return true;
     }
 
     public function getClientId()
     {
-        return $this->clientId;
+        return $this->apiOptions['client_id'];
     }
 
     public function getClientSecret()
     {
-        return $this->clientSecret;
+        return $this->apiOptions['client_secret'];
     }
 
-    public function getAdmitadApi(User $user)
+    public function getAdmitadApi(UserInterface $user = null)
     {
-        return new Api($user->getAdmitadAccessToken());
+        return new Api($user ? $user->getAdmitadAccessToken() : null);
+    }
+
+    public function loadUserByToken(AbstractToken $token)
+    {
+        $api = new Api($token->getAccessToken());
+
+        $me = $api->me()->getResult();
+
+        $user = $this->userEntityManager->getRepository($this->userClass)->findOneBy(['admitadId' => $me['id']]);
+
+        if (!$user) {
+            $user = $this->createUser();
+        }
+
+        if (isset($me['email'])) {
+            $user->setEmail($me['email']);
+        }
+
+        $user->setAdmitadId($me['id']);
+        $user->setUsername($me['username']);
+        $user->setFirstName($me['first_name']);
+        $user->setLastName($me['last_name']);
+        $user->setAdmitadAccessToken($token->getAccessToken());
+        $user->setAdmitadRefreshToken($token->getRefreshToken());
+        $user->setAdmitadTokenExpireIn($token->getExpireIn());
+
+        $this->userEntityManager->flush($user);
+
+        return $user;
+    }
+
+    /**
+     * @return UserInterface
+     */
+    public function createUser()
+    {
+        $class = $this->userClass;
+        return new $class();
     }
 }

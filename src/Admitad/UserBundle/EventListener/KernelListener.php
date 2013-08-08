@@ -5,6 +5,7 @@ namespace Admitad\UserBundle\EventListener;
 use Admitad\Api\Exception\Exception;
 use Admitad\UserBundle\Entity\User;
 use Admitad\UserBundle\Manager\Manager;
+use Admitad\UserBundle\Model\UserInterface;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
@@ -52,20 +53,19 @@ class KernelListener
         }
 
         /**
-         * @var User $user
+         * @var UserInterface $user
          */
         $user = $token->getUser();
 
 
-        if (!$user instanceof User) {
+        if (!$user instanceof UserInterface) {
             return;
         }
 
         try {
             $this->manager->refreshExpiredToken($user);
         } catch (Exception $e) {
-            $authUrl = $this->router->generate('login_admitad_oauth');
-            $event->setResponse(new RedirectResponse($authUrl));
+            $this->securityContext->setToken(null);
         }
     }
 }
