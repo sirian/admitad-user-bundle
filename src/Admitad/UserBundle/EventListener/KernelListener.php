@@ -51,7 +51,6 @@ class KernelListener
         if (null === $token) {
             return;
         }
-
         /**
          * @var UserInterface $user
          */
@@ -65,7 +64,7 @@ class KernelListener
         try {
             $this->manager->refreshExpiredToken($user);
         } catch (Exception $e) {
-            $this->securityContext->setToken(null);
+            //todo: logout user
         }
     }
 }

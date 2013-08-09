@@ -29,7 +29,6 @@ class AdmitadProvider implements AuthenticationProviderInterface
 
     public function authenticate(TokenInterface $token)
     {
-        echo 1;
         /**
          * @var AbstractToken $token
          */

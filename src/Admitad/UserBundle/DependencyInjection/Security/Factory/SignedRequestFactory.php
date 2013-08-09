@@ -22,6 +22,7 @@ class SignedRequestFactory extends AbstractFactory
 
     public function addConfiguration(NodeDefinition $node)
     {
+        $this->addOption('require_previous_session', false);
         parent::addConfiguration($node);
     }
 

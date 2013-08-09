@@ -23,6 +23,7 @@ class Manager
 
     public function refreshExpiredToken(UserInterface $user)
     {
+
         if ($user->isAdmitadTokenExpired()) {
             if (!$user->getAdmitadRefreshToken()) {
                 return false;

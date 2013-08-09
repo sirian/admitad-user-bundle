@@ -116,7 +116,7 @@ abstract class User extends BaseUser implements UserInterface
 
     public function isAdmitadTokenExpired()
     {
-        return $this->admitadTokenExpire <= time();
+        return $this->getAdmitadTokenExpireIn() <= 0;
     }
 
     public function getFirstName()
