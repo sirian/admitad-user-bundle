@@ -7,17 +7,20 @@ use Admitad\Api\Exception\Exception;
 use Admitad\UserBundle\Model\UserInterface;
 use Admitad\UserBundle\Security\Authentication\Token\AbstractToken;
 use Doctrine\Bundle\DoctrineBundle\Registry;
+use FOS\UserBundle\Doctrine\UserManager;
 
 class Manager
 {
     protected $userEntityManager;
-    protected $userClass;
     protected $apiOptions;
+    protected $userManager;
+    protected $userClass;
 
-    public function __construct(Registry $doctrine, $userClass, $apiOptions)
+    public function __construct(Registry $doctrine, UserManager $userManager, $userClass, $apiOptions)
     {
         $this->userEntityManager = $doctrine->getManagerForClass($userClass);
         $this->apiOptions = $apiOptions;
+        $this->userManager = $userManager;
         $this->userClass = $userClass;
     }
 
@@ -87,7 +90,8 @@ class Manager
         $user->setAdmitadRefreshToken($token->getRefreshToken());
         $user->setAdmitadTokenExpireIn($token->getExpireIn());
 
-        $this->userEntityManager->flush($user);
+        //$this->userEntityManager->flush($user);
+        $this->userManager->updateUser($user);
 
         return $user;
     }
