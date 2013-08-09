@@ -6,22 +6,17 @@ use Admitad\Api\Api;
 use Admitad\Api\Exception\Exception;
 use Admitad\UserBundle\Model\UserInterface;
 use Admitad\UserBundle\Security\Authentication\Token\AbstractToken;
-use Doctrine\Bundle\DoctrineBundle\Registry;
 use FOS\UserBundle\Doctrine\UserManager;
 
 class Manager
 {
-    protected $userEntityManager;
     protected $apiOptions;
     protected $userManager;
-    protected $userClass;
 
-    public function __construct(Registry $doctrine, UserManager $userManager, $userClass, $apiOptions)
+    public function __construct(UserManager $userManager, $apiOptions)
     {
-        $this->userEntityManager = $doctrine->getManagerForClass($userClass);
-        $this->apiOptions = $apiOptions;
         $this->userManager = $userManager;
-        $this->userClass = $userClass;
+        $this->apiOptions = $apiOptions;
     }
 
     public function refreshExpiredToken(UserInterface $user)
@@ -40,11 +35,11 @@ class Manager
                 $user->setAdmitadAccessToken($data['access_token']);
                 $user->setAdmitadRefreshToken($data['refresh_token']);
                 $user->setAdmitadTokenExpireIn($data['expires_in']);
-                $this->userEntityManager->flush($user);
+                $this->userManager->updateUser($user);
             } catch (Exception $e) {
                 $user->setAdmitadRefreshToken('');
                 $user->setAdmitadAccessToken('');
-                $this->userEntityManager->flush($user);
+                $this->userManager->updateUser($user);
                 throw $e;
             }
         }
@@ -72,10 +67,10 @@ class Manager
 
         $me = $api->me()->getResult();
 
-        $user = $this->userEntityManager->getRepository($this->userClass)->findOneBy(['admitadId' => $me['id']]);
+        $user = $this->userManager->findUserBy(['admitadId' => $me['id']]);
 
         if (!$user) {
-            $user = $this->createUser();
+            $user = $this->userManager->createUser();
         }
 
         if (isset($me['email'])) {
@@ -90,18 +85,8 @@ class Manager
         $user->setAdmitadRefreshToken($token->getRefreshToken());
         $user->setAdmitadTokenExpireIn($token->getExpireIn());
 
-        //$this->userEntityManager->flush($user);
         $this->userManager->updateUser($user);
 
         return $user;
-    }
-
-    /**
-     * @return UserInterface
-     */
-    public function createUser()
-    {
-        $class = $this->userClass;
-        return new $class();
     }
 }

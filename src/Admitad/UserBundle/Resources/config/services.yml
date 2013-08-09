@@ -1,7 +1,7 @@
 services:
     admitad_user.manager:
         class: Admitad\UserBundle\Manager\Manager
-        arguments: [@doctrine, @fos_user.user_manager]
+        arguments: [@fos_user.user_manager]
 
     admitad_user.expired_token_listener:
         class: Admitad\UserBundle\EventListener\KernelListener

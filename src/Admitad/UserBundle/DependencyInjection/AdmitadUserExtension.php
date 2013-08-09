@@ -21,7 +21,6 @@ class AdmitadUserExtension extends Extension
 
         $manager = $container->getDefinition('admitad_user.manager');
         $manager
-            ->addArgument($config['user_class'])
             ->addArgument($config['api'])
         ;
     }

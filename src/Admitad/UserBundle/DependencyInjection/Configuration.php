@@ -20,7 +20,6 @@ class Configuration implements ConfigurationInterface
                         ->scalarNode('client_secret')->isRequired()->end()
                     ->end()
                 ->end()
-                ->scalarNode('user_class')->isRequired()->end()
             ->end()
         ;
 
