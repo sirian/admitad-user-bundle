@@ -52,6 +52,7 @@ abstract class User extends BaseUser implements UserInterface
         parent::__construct();
         $this->generateRandomEmail();
         $this->password = '';
+        $this->setEnabled(true);
     }
 
     public function getAdmitadId()
