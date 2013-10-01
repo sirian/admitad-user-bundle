@@ -46,6 +46,10 @@ class OAuthListener extends AbstractAuthenticationListener
 
     protected function attemptAuthentication(Request $request)
     {
+        if ($request->query->has('error')) {
+            throw new AuthenticationException($request->query->get('error_description'));
+        }
+
         if (!$request->query->has('code')) {
             return $this->redirectToAdmitad();
         }
