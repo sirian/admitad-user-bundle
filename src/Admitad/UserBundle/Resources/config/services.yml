@@ -1,24 +1,32 @@
+parameters:
+    admitad_user.api_options.class: Admitad\UserBundle\Api\ApiOptions
+    admitad_user.user_manager.class: Admitad\UserBundle\Manager\UserManager
+    admitad_user.admitad_token_user_provider.class: Admitad\UserBundle\Security\AdmitadTokenUserProvider
+    admitad_user.expired_token_listener.class: Admitad\UserBundle\EventListener\KernelListener
+    admitad_user.authentication.provider.class: Admitad\UserBundle\Security\Authentication\Provider\AdmitadProvider
+    admitad_user.authentication.listener.oauth.class: Admitad\UserBundle\Security\Firewall\OAuthListener
+    admitad_user.authentication.listener.signed_request.class: Admitad\UserBundle\Security\Firewall\SignedRequestListener
+
 services:
     admitad_user.api_options:
-        class: Admitad\UserBundle\Api\ApiOptions
+        class: %admitad_user.api_options.class%
 
     admitad_user.user_manager:
-        class: Admitad\UserBundle\Manager\UserManager
+        class: %admitad_user.user_manager.class%
         arguments: [@admitad_user.api_options]
 
     admitad_user.admitad_token_user_provider:
-        class: Admitad\UserBundle\Security\AdmitadTokenUserProvider
+        class: %admitad_user.admitad_token_user_provider.class%
         arguments: [@admitad_user.user_manager, @admitad_user.api_options]
 
     admitad_user.expired_token_listener:
-        class: Admitad\UserBundle\EventListener\KernelListener
+        class: %admitad_user.expired_token_listener.class%
         arguments: [@security.context, @admitad_user.user_manager, @router]
         tags:
             - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest }
 
-
     admitad_user.authentication.provider:
-        class: Admitad\UserBundle\Security\Authentication\Provider\AdmitadProvider
+        class: %admitad_user.authentication.provider.class%
         arguments: [@security.user_checker, @admitad_user.admitad_token_user_provider]
         public: false
 
@@ -30,7 +38,7 @@ services:
         abstract: true
 
     admitad_user.authentication.listener.oauth:
-        class:  Admitad\UserBundle\Security\Firewall\OAuthListener
+        class:  %admitad_user.authentication.listener.oauth.class%
         calls:
             - [setRouter, [@router]]
         parent: admitad_user.authentication.listener
@@ -38,7 +46,7 @@ services:
         abstract: true
 
     admitad_user.authentication.listener.signed_request:
-        class:  Admitad\UserBundle\Security\Firewall\SignedRequestListener
+        class:  %admitad_user.authentication.listener.signed_request.class%
         parent: admitad_user.authentication.listener
         public: false
         abstract: true

@@ -34,7 +34,7 @@ class UserManager
         if (!$user->getAdmitadRefreshToken()) {
             return false;
         }
-        
+
         try {
             $api = new Api($user->getAdmitadAccessToken());
 
