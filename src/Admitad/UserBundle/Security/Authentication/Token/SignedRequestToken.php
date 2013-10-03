@@ -2,7 +2,7 @@
 
 namespace Admitad\UserBundle\Security\Authentication\Token;
 
-class SignedRequestToken extends AbstractToken
+class SignedRequestToken extends AdmitadToken
 {
 
 }

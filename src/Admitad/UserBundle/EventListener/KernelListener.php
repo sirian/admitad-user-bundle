@@ -3,11 +3,9 @@
 namespace Admitad\UserBundle\EventListener;
 
 use Admitad\Api\Exception\Exception;
-use Admitad\UserBundle\Entity\User;
-use Admitad\UserBundle\Manager\Manager;
-use Admitad\UserBundle\Model\UserInterface;
+use Admitad\UserBundle\Manager\UserManager;
+use Admitad\UserBundle\Model\AdmitadUserInterface;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\HttpKernel\HttpKernel;
 use Symfony\Component\Security\Core\SecurityContext;
@@ -20,7 +18,7 @@ class KernelListener
     protected $securityContext;
 
     /**
-     * @var Manager
+     * @var UserManager
      */
     protected $manager;
 
@@ -29,7 +27,7 @@ class KernelListener
      */
     protected $router;
 
-    public function __construct(SecurityContext $securityContext, Manager $manager, Router $router)
+    public function __construct(SecurityContext $securityContext, UserManager $manager, Router $router)
     {
         $this->securityContext = $securityContext;
         $this->router = $router;
@@ -51,20 +49,20 @@ class KernelListener
         if (null === $token) {
             return;
         }
-        /**
-         * @var UserInterface $user
-         */
+
         $user = $token->getUser();
 
 
-        if (!$user instanceof UserInterface) {
+        if (!$user instanceof AdmitadUserInterface) {
             return;
         }
 
         try {
-            $this->manager->refreshExpiredToken($user);
+            if ($user->isAdmitadTokenExpired()) {
+                $this->manager->refreshExpiredToken($user);
+            }
         } catch (Exception $e) {
-            //todo: logout user
+            //todo: probably logout user
         }
     }
 }

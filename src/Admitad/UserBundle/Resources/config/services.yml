@@ -1,33 +1,44 @@
 services:
-    admitad_user.manager:
-        class: Admitad\UserBundle\Manager\Manager
-        arguments: [@fos_user.user_manager]
+    admitad_user.api_options:
+        class: Admitad\UserBundle\Api\ApiOptions
+
+    admitad_user.user_manager:
+        class: Admitad\UserBundle\Manager\UserManager
+        arguments: [@admitad_user.api_options]
+
+    admitad_user.admitad_token_user_provider:
+        class: Admitad\UserBundle\Security\AdmitadTokenUserProvider
+        arguments: [@admitad_user.user_manager, @admitad_user.api_options]
 
     admitad_user.expired_token_listener:
         class: Admitad\UserBundle\EventListener\KernelListener
-        arguments: [@security.context, @admitad_user.manager, @router]
+        arguments: [@security.context, @admitad_user.user_manager, @router]
         tags:
             - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest }
 
 
     admitad_user.authentication.provider:
         class: Admitad\UserBundle\Security\Authentication\Provider\AdmitadProvider
-        arguments: [@security.user_checker, @admitad_user.manager]
+        arguments: [@security.user_checker, @admitad_user.admitad_token_user_provider]
         public: false
+
+    admitad_user.authentication.listener:
+        parent: security.authentication.listener.abstract
+        calls:
+            - [setApiOptions, [@admitad_user.api_options]]
+        public: false
+        abstract: true
 
     admitad_user.authentication.listener.oauth:
         class:  Admitad\UserBundle\Security\Firewall\OAuthListener
         calls:
-            - [setManager, [@admitad_user.manager]]
             - [setRouter, [@router]]
-        parent: security.authentication.listener.abstract
+        parent: admitad_user.authentication.listener
         public: false
         abstract: true
 
     admitad_user.authentication.listener.signed_request:
         class:  Admitad\UserBundle\Security\Firewall\SignedRequestListener
-        calls:
-            - [setManager, [@admitad_user.manager]]
-        parent: security.authentication.listener.abstract
+        parent: admitad_user.authentication.listener
         public: false
         abstract: true

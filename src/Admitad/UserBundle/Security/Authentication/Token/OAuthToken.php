@@ -2,7 +2,7 @@
 
 namespace Admitad\UserBundle\Security\Authentication\Token;
 
-class OAuthToken extends AbstractToken
+class OAuthToken extends AdmitadToken
 {
 
 }

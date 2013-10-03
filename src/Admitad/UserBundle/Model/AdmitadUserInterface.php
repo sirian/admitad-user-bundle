@@ -2,7 +2,9 @@
 
 namespace Admitad\UserBundle\Model;
 
-interface UserInterface extends \Symfony\Component\Security\Core\User\UserInterface
+use Symfony\Component\Security\Core\User\UserInterface;
+
+interface AdmitadUserInterface extends UserInterface
 {
     public function getAdmitadId();
     public function setAdmitadId($id);

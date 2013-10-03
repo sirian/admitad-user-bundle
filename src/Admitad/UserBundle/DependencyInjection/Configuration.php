@@ -14,10 +14,15 @@ class Configuration implements ConfigurationInterface
 
         $root
             ->children()
+                ->scalarNode('user_class')->isRequired()->end()
+                ->scalarNode('manager')->defaultNull()->end()
                 ->arrayNode('api')
                     ->children()
                         ->scalarNode('client_id')->isRequired()->end()
                         ->scalarNode('client_secret')->isRequired()->end()
+                        ->arrayNode('paths')
+                            ->prototype('scalar')
+                        ->end()
                     ->end()
                 ->end()
             ->end()

@@ -3,36 +3,20 @@
 namespace Admitad\UserBundle\Security\Firewall;
 
 use Admitad\Api\Api;
-use Admitad\UserBundle\Manager\Manager;
+use Admitad\Api\Exception\ApiException;
+use Admitad\Api\Exception\Exception;
 use Admitad\UserBundle\Security\Authentication\Token\OAuthToken;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
-use Symfony\Component\Security\Http\Firewall\AbstractAuthenticationListener;
 
 class OAuthListener extends AbstractAuthenticationListener
 {
     /**
-     * @var Manager
-     */
-    protected $manager;
-
-    /**
      * @var Router
      */
     protected $router;
-
-    public function getManager()
-    {
-        return $this->manager;
-    }
-
-    public function setManager(Manager $manager)
-    {
-        $this->manager = $manager;
-    }
 
     public function getRouter()
     {
@@ -55,12 +39,16 @@ class OAuthListener extends AbstractAuthenticationListener
         }
 
         $api = new Api();
-        $data = $api->requestAccessToken(
-            $this->manager->getClientId(),
-            $this->manager->getClientSecret(),
-            $request->get('code'),
-            $this->getRedirectUri()
-        )->getResult();
+        try {
+            $data = $api->requestAccessToken(
+                $this->apiOptions->getClientId(),
+                $this->apiOptions->getClientSecret(),
+                $request->get('code'),
+                $this->getRedirectUri()
+            )->getResult();
+        } catch (ApiException $e) {
+            throw new AuthenticationException($e->getResponse()->getErrorDescription());
+        }
 
         $token = new OAuthToken($data->getArrayCopy());
         return $this->authenticationManager->authenticate($token);
@@ -68,10 +56,9 @@ class OAuthListener extends AbstractAuthenticationListener
 
     protected function redirectToAdmitad()
     {
-
         $api = new Api();
         return new RedirectResponse($api->getAuthorizeUrl(
-            $this->manager->getClientId(),
+            $this->apiOptions->getClientId(),
             $this->getRedirectUri(),
             $this->options['scope']
         ));
