@@ -50,3 +50,4 @@ services:
         parent: admitad_user.authentication.listener
         public: false
         abstract: true
+

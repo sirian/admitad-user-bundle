@@ -23,6 +23,7 @@ class SignedRequestFactory extends AbstractFactory
     public function addConfiguration(NodeDefinition $node)
     {
         $this->addOption('require_previous_session', false);
+
         parent::addConfiguration($node);
     }
 
@@ -39,5 +40,21 @@ class SignedRequestFactory extends AbstractFactory
     public function getPosition()
     {
         return 'http';
+    }
+
+    protected function createAuthenticationSuccessHandler($container, $id, $config)
+    {
+        if (isset($config['success_handler'])) {
+            return $config['success_handler'];
+        }
+
+        $successHandlerId = $this->getSuccessHandlerId($id);
+
+        $successHandler = $container->setDefinition($successHandlerId, new DefinitionDecorator('security.authentication.success_handler'));
+        $successHandler->setClass('Admitad\UserBundle\Security\Authentication\SignedRequestSuccessHandler');
+        $successHandler->replaceArgument(1, array_intersect_key($config, $this->defaultSuccessHandlerOptions));
+        $successHandler->addMethodCall('setProviderKey', array($id));
+
+        return $successHandlerId;
     }
 }
