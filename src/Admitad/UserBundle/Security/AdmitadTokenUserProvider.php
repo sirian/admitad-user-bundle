@@ -38,7 +38,12 @@ class AdmitadTokenUserProvider implements AdmitadTokenUserProviderInterface
         $user = $this->loadUserByAdmitadData($me);
 
         if (!$user) {
-            throw new UsernameNotFoundException();
+            $exception = new UserNotFoundException();
+            $exception
+                ->setToken($token)
+                ->setUserData($me)
+            ;
+            throw $exception;
         }
 
         $user->setAdmitadId($me['id']);
