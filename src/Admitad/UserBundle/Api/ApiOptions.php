@@ -6,13 +6,11 @@ class ApiOptions
 {
     private $clientId;
     private $clientSecret;
-    private $paths = [];
 
-    public function __construct($clientId, $clientSecret, $paths = [])
+    public function __construct($clientId, $clientSecret)
     {
         $this->clientId = $clientId;
         $this->clientSecret = $clientSecret;
-        $this->paths = $paths;
     }
 
     public function getClientId()
@@ -34,17 +32,6 @@ class ApiOptions
     public function setClientSecret($clientSecret)
     {
         $this->clientSecret = $clientSecret;
-        return $this;
-    }
-
-    public function getPaths()
-    {
-        return $this->paths;
-    }
-
-    public function setPaths($paths)
-    {
-        $this->paths = $paths;
         return $this;
     }
 }

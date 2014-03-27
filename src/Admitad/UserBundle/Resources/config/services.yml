@@ -10,6 +10,7 @@ parameters:
 services:
     admitad_user.api_options:
         class: %admitad_user.api_options.class%
+        arguments: [~,~]
 
     admitad_user.user_manager:
         class: %admitad_user.user_manager.class%

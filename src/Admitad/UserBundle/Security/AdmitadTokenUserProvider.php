@@ -46,14 +46,6 @@ class AdmitadTokenUserProvider implements AdmitadTokenUserProviderInterface
         $user->setAdmitadRefreshToken($token->getRefreshToken());
         $user->setAdmitadTokenExpireIn($token->getExpireIn());
 
-        $propertyAccessor = new PropertyAccessor();
-        foreach ($this->apiOptions->getPaths() as $property => $path) {
-            if (!isset($me[$path])) {
-                continue;
-            }
-            $propertyAccessor->setValue($user, $property, $me[$path]);
-        }
-
         $this->manager->updateUser($user);
 
         return $user;
@@ -68,10 +60,6 @@ class AdmitadTokenUserProvider implements AdmitadTokenUserProviderInterface
         $user = $this->manager->findOneBy([
             'admitadId' => $data['id']
         ]);
-
-        if (!$user) {
-            $user = $this->manager->createUser();
-        }
 
         return $user;
     }

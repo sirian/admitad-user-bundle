@@ -29,9 +29,8 @@ class AdmitadUserExtension extends Extension
         $apiConfig = $config['api'];
         $apiOptions = $container->getDefinition('admitad_user.api_options');
         $apiOptions
-            ->addArgument($apiConfig['client_id'])
-            ->addArgument($apiConfig['client_secret'])
-            ->addArgument($apiConfig['paths'])
+            ->replaceArgument(0, $apiConfig['client_id'])
+            ->replaceArgument(1, $apiConfig['client_secret'])
         ;
     }
 }

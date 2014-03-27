@@ -13,16 +13,12 @@ class UserManager
     protected $apiOptions;
     protected $repository;
     protected $objectManager;
-    protected $class;
 
     public function __construct(ApiOptions $apiOptions, ObjectManager $om, $class)
     {
         $this->apiOptions = $apiOptions;
         $this->objectManager = $om;
         $this->repository = $om->getRepository($class);
-
-        $metadata = $om->getClassMetadata($class);
-        $this->class = $metadata->getName();
     }
 
     public function refreshExpiredToken(AdmitadUserInterface $user)
@@ -64,12 +60,6 @@ class UserManager
         if ($andFlush) {
             $this->objectManager->flush();
         }
-    }
-
-    public function createUser()
-    {
-        $class = $this->class;
-        return new $class();
     }
 
     public function findOneBy($criteria)

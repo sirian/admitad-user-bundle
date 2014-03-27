@@ -57,4 +57,5 @@ class SignedRequestFactory extends AbstractFactory
 
         return $successHandlerId;
     }
+
 }
