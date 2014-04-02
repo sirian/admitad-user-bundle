@@ -40,8 +40,8 @@ class AdmitadTokenUserProvider implements AdmitadTokenUserProviderInterface
         if (!$user) {
             $exception = new UserNotFoundException();
             $exception
-                ->setToken($token)
                 ->setUserData($me)
+                ->setToken($token)
             ;
             throw $exception;
         }
