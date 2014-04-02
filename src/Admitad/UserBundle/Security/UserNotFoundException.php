@@ -3,6 +3,7 @@
 namespace Admitad\UserBundle\Security;
 
 use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
 class UserNotFoundException extends UsernameNotFoundException
 {
@@ -15,7 +16,7 @@ class UserNotFoundException extends UsernameNotFoundException
         return $this->token;
     }
 
-    public function setToken($token)
+    public function setToken(TokenInterface $token)
     {
         $this->token = $token;
 
