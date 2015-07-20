@@ -41,6 +41,6 @@ abstract class AdmitadToken extends BaseAbstractToken
 
     public function getExpireIn()
     {
-        return $this->getUserData('expire_in');
+        return $this->getUserData('expires_in');
     }
 }
