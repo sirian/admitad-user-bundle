@@ -45,7 +45,6 @@ class UserManager
 
             $this->updateUser($user);
         } catch (Exception $e) {
-            $user->setAdmitadRefreshToken('');
             $user->setAdmitadAccessToken('');
 
             $this->updateUser($user);
