@@ -8,6 +8,6 @@
     },
     "require": {
         "php": ">=5.3.0",
-        "admitad/api": "dev-master"
+        "admitad/api": "^0.1"
     }
 }
