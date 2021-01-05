@@ -9,25 +9,25 @@ parameters:
 
 services:
     admitad_user.api_options:
-        class: %admitad_user.api_options.class%
+        class: "%admitad_user.api_options.class%"
         arguments: [~,~]
 
     admitad_user.user_manager:
-        class: %admitad_user.user_manager.class%
+        class: "%admitad_user.user_manager.class%"
         arguments: ["@admitad_user.api_options"]
 
     admitad_user.admitad_token_user_provider:
-        class: %admitad_user.admitad_token_user_provider.class%
+        class: "%admitad_user.admitad_token_user_provider.class%"
         arguments: ["@admitad_user.user_manager", "@admitad_user.api_options"]
 
     admitad_user.expired_token_listener:
-        class: %admitad_user.expired_token_listener.class%
+        class: "%admitad_user.expired_token_listener.class%"
         arguments: ["@security.context", "@admitad_user.user_manager", "@router"]
         tags:
             - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest }
 
     admitad_user.authentication.provider:
-        class: %admitad_user.authentication.provider.class%
+        class: "%admitad_user.authentication.provider.class%"
         arguments: ["@security.user_checker", "@admitad_user.admitad_token_user_provider"]
         public: false
 
@@ -39,7 +39,7 @@ services:
         abstract: true
 
     admitad_user.authentication.listener.oauth:
-        class:  %admitad_user.authentication.listener.oauth.class%
+        class:  "%admitad_user.authentication.listener.oauth.class%"
         calls:
             - [setRouter, ["@router"]]
         parent: admitad_user.authentication.listener
@@ -47,7 +47,7 @@ services:
         abstract: true
 
     admitad_user.authentication.listener.signed_request:
-        class:  %admitad_user.authentication.listener.signed_request.class%
+        class:  "%admitad_user.authentication.listener.signed_request.class%"
         parent: admitad_user.authentication.listener
         public: false
         abstract: true
